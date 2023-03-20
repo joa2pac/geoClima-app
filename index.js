@@ -1,49 +1,39 @@
-const { inquirerMenu,
-    pausa,
-    leerInput,
-    } = require("./helpers/inquirer");
+const { inquirerMenu, pausa, leerInput } = require("./helpers/inquirer");
 const Busquedas = require("./models/busquedas");
 
+const main = async () => {
+  const busquedas = new Busquedas();
+  let opt = "";
 
-const main = async() => {
+  do {
+    opt = await inquirerMenu();
 
-    const busquedas = new Busquedas();
-    let opt = "";
+    switch (opt) {
+      case 1:
+        // Mostrar mensaje
+        const lugar = await leerInput("Ciudad: ");
+        await busquedas.ciudad(lugar);
 
-    do {
-        opt = await inquirerMenu();
-        
-        switch( opt ) {
+        // Buscar los lugares
 
-            case 1:
-                // Mostrar mensaje
-                const  lugar = await leerInput('Ciudad: ');
-                console.log(lugar);
+        // Seleccionar el lugar
 
-                // Buscar los lugares
+        // Clima
 
-                // Seleccionar el lugar 
+        // Mostrar resultados
+        console.log("\nInformación de la ciudad\n".green);
+        console.log("Ciudad:");
+        console.log("Lat:");
+        console.log("Lng:");
+        console.log("Temperatura:");
+        console.log("Mínima:");
+        console.log("Máxima:");
 
-                // Clima
+        break;
+    }
 
-                // Mostrar resultados
-                console.log('\nInformación de la ciudad\n'.green);
-                console.log('Ciudad:', );
-                console.log('Lat:', );
-                console.log('Lng:', );
-                console.log('Temperatura:', );
-                console.log('Mínima:', );
-                console.log('Máxima:', );
-
-            break;
-
-        }
-        
-        if( opt !== 0 ) await pausa();
-       
-        
-      } while (opt !== 0);
-
-}
+    if (opt !== 0) await pausa();
+  } while (opt !== 0);
+};
 
 main();
