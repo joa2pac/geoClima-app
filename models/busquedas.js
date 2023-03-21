@@ -1,7 +1,10 @@
+const fs = require('fs');
+
 const axios = require("axios");
 
 class Busquedas {
-  historial = ["Tegucigalpa", "Madrid", "San José"];
+  historial = [];
+  dbPath = './db/database.json';
 
   constructor() {}
 
@@ -15,8 +18,10 @@ class Busquedas {
 
   get paramsOpenweather() {
     return {
-      access_token: process.env.OPENWEATHER_KEY,
-      lenguage: "es",
+      appid: process.env.OPENWEATHER_KEY,
+      units: 'metric',
+      lang: 'es'
+      
     };
   }
 
@@ -25,7 +30,7 @@ class Busquedas {
       // peticion http
       const intance = axios.create({
         baseURL: `https://api.mapbox.com/geocoding/v5/mapbox.places/${lugar}.json`,
-        params: this.paramsMapbox,
+        params: this.paramsMapbox
       });
 
       const resp = await intance.get();
@@ -46,23 +51,63 @@ class Busquedas {
 
     try {
       // peticion http
-      const intance = axios.create({
-        baseURL: `https://api.openweathermap.org/data/2.5/weather?lat=${ lat }&lon=${ lon }`,
-        params: this.paramsOpenweather,
+      const instance = axios.create({
+        baseURL: `https://api.openweathermap.org/data/2.5/weather`,
+        params: { ...this.paramsOpenweather, lat, lon}
       });
 
-      const resp = await intance.get();
-      return resp.data.main.map( temp => ({
-        temperatura: temp.temp,
-        temperaturaMin: temp.temp_min,
-        temperaturaMax: temp.temp_max,
-      }));
+      const resp = await instance.get();
+      const{ weather, main } = resp.data;
+  
+      return {
+        desc: weather[0].description,
+        min: main.temp_min,
+        max: main.temp_max,
+        temp: main.temp,
+      };
 
     } catch ( error ) {
       console.log(error)
     }
 
   }
+
+  agregarHistorial( lugar = '') {
+
+    if ( this.historial.includes.apply( lugar.toLocaleLowerCase() ) ) {
+      return;
+    }
+
+    this.historial.unshift( lugar.toLocaleLowerCase() );
+
+    this.guardarDB();
+
+    this.leerDB();
+
+  }
+
+  guardarDB() {
+
+    const payload = {
+      historial: this.historial
+    };
+
+    fs.writeFileSync( this.dbPath, JSON.stringify( payload ))
+
+  }
+
+  leerDB = () => {
+    if ( !fs.existsSync(historial) ) {
+        return null;
+    }
+
+    const info = fs.readFileSync(historial, { encoding: 'utf-8' });
+    const data = JSON.parse( info );
+
+    // console.log(data);
+
+    return data;
+}
 
 }
 
