@@ -7,9 +7,15 @@ class Busquedas {
 
   get paramsMapbox() {
     return {
-      access_token:
-        "pk.eyJ1Ijoiam9hcXVpbmFodWVsOTMiLCJhIjoiY2xmaGEwamxyMDY0ODNxbm16Zm4zOG9tcCJ9.pE6F2xPGsBJwvcf1vAmFMg",
+      access_token: process.env.MAPBOX_KEY,
       limit: 5,
+      lenguage: "es",
+    };
+  }
+
+  get paramsOpenweather() {
+    return {
+      access_token: process.env.OPENWEATHER_KEY,
       lenguage: "es",
     };
   }
@@ -23,16 +29,41 @@ class Busquedas {
       });
 
       const resp = await intance.get();
-
-      console.log(resp);
-
-      console.log(resp.data);
-
-      return [];
+      return resp.data.features.map( lugar => ({
+        id: lugar.id,
+        nombre: lugar.place_name,
+        lng: lugar.center[0],
+        lat: lugar.center[1],
+      }));
+      
+      
     } catch (error) {
       return [];
     }
   }
+
+  async climarLugar( lat, lon ) {
+
+    try {
+      // peticion http
+      const intance = axios.create({
+        baseURL: `https://api.openweathermap.org/data/2.5/weather?lat=${ lat }&lon=${ lon }`,
+        params: this.paramsOpenweather,
+      });
+
+      const resp = await intance.get();
+      return resp.data.main.map( temp => ({
+        temperatura: temp.temp,
+        temperaturaMin: temp.temp_min,
+        temperaturaMax: temp.temp_max,
+      }));
+
+    } catch ( error ) {
+      console.log(error)
+    }
+
+  }
+
 }
 
 module.exports = Busquedas;
